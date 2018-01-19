@@ -1,5 +1,63 @@
 import React from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, Button, Alert } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator, FlatList, Button, Alert } from 'react-native';
+
+class MyListItem extends React.PureComponent {
+    _onPress = () => {
+        this.props.onPressItem(this.props.id);
+    };
+
+  render() {
+      const textColor = this.props.selected ? "red" : "black";
+      return (
+          <View>
+                <Text style={{ color: textColor }}>
+                {this.props.title}
+                </Text>
+          </View>
+    );
+  }
+}
+
+class MultiSelectList extends React.PureComponent {
+
+    state = {
+        "selected": (new Map(): Map<string, boolean>)
+    };
+
+    _keyExtractor = function(item, index){
+        return item.id;
+    }
+
+    _onPressItem = function(id){
+        this.setState(function(state){
+            const selected = new Map(state.selected);
+            selected.set(id, !selected.get(id));
+            return {
+                "selected":selected
+            };
+        });
+    };
+
+    _renderItem = ({item}) => (
+        <MyListItem
+            style={styles.block}
+            id={item.id}
+            selected={!!this.state.selected.get(item.id)}
+            title={item.title}
+        />
+    );
+
+  render() {
+    return (
+      <FlatList
+        data={this.props.data}
+        extraData={this.state}
+        keyExtractor={this._keyExtractor}
+        renderItem={this._renderItem}
+      />
+    );
+  }
+}
 
 class Blink extends React.Component {
     constructor(props) {
@@ -24,6 +82,33 @@ class Blink extends React.Component {
     }
 }
 
+var DATA = [
+    {
+        "title":"TITLE0",
+        "id":0
+    },
+    {
+        "title":"TITLE1",
+        "id":1
+    },
+    {
+        "title":"TITLE2",
+        "id":2
+    },
+    {
+        "title":"TITLE3",
+        "id":3
+    },
+    {
+        "title":"TITLE4",
+        "id":4
+    },
+    {
+        "title":"TITLE5",
+        "id":5
+    }
+];
+
 export default class App extends React.Component {
     onPressLearnMore(){
         Alert.alert(
@@ -36,6 +121,14 @@ export default class App extends React.Component {
           ],
           { cancelable: false }
         )
+    }
+    onPress(e){
+        console.log(e);
+        return true;
+    }
+    onMove(e){
+        console.log(e);
+        return true;
     }
     render() {
         return (
@@ -50,6 +143,18 @@ export default class App extends React.Component {
                     color="#841584"
                     accessibilityLabel="Learn more about this purple button"
                 />
+                <MultiSelectList style={styles.list}
+                    data={DATA}
+                    onStartShouldSetResponder=      {this.onPress.bind(this)}
+                    onMoveShouldSetResponder=       {this.onMove.bind(this)}
+                    onResponderGrant=               {this.onMove.bind(this)}
+                    onResponderReject=              {this.onMove.bind(this)}
+                    onResponderMove=                {this.onMove.bind(this)}
+                    onResponderRelease=             {this.onMove.bind(this)}
+                    onResponderTerminationRequest=  {this.onMove.bind(this)}
+                    onResponderTerminate=           {this.onMove.bind(this)}
+                    >
+                </MultiSelectList>
             </View>
         );
     }
@@ -58,9 +163,18 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        color:"orange",
         backgroundColor: '#aaf',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
+    },
+    list: {
+        backgroundColor: 'pink',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    block:{
+        width:40,
+        height:40,
+        backgroundColor: '#6f6'
     }
 });
